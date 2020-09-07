@@ -12,8 +12,8 @@ from sklearn.metrics import mean_squared_error, explained_variance_score
 #impose the initial parameters of the Genetic algorithm
 p_crossover = 1 # since p_crossover is equl to 1 there is no need of inserting it into the algorithm, all the genes will undergo crossover
 p_mutation = 0.3
-p_translation = 0.3
-p_swap = 0.3
+p_translation = 0.1
+p_swap = 0.1
 rep_rate = 0.2
 pop = 100
 gen = 20
