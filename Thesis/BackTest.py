@@ -159,3 +159,65 @@ best_set = np.array(best_set)
 
 #backtest on a certain amount of data for a certain period
 total_res, result, tics, total_rets, partial_rets = backtesting(DF, "next", best_set = best_set, period = 14, test_size = 0.2, ym_start = "1999-01-01", ym_end= "2019-11-01", kernel_size = 2, dropout = 0.2, epochs = 2, batch = 512, verbose = 1)
+
+
+#Backtest on 12 weeks in 2017, best set
+ym_end = "2017-05-01"
+backtest_results_best_set = {}
+period = 14
+
+for i in range(6): 
+    total_res, result, tickers, total_rets, partial_rets = backtesting(DF, "next", best_set = best_set, period = period, test_size = 0.02, ym_start = "1999-01-01", ym_end= ym_end, kernel_size = 2, dropout = 0.2, epochs = 2, batch = 512, verbose = 1)
+    backtest_results_best_set[ym_end] = total_res, result, tickers, total_rets, partial_rets 
+    print("Done with number: " + str(i))
+    ym_end = str(np.datetime64(ym_end) + np.array(period, 'timedelta64[D]'))
+
+    
+#extract the results of the best set strategy
+best_set_results = []
+for key in backtest_results_best_set.keys():
+    best_set_result = backtest_results_best_set[key][0][-1:]
+    best_set_results.append(best_set_result)
+
+#create an array to keep all teh variables in the set
+l = [1]
+l = l*84
+full_set = np.array(l)
+
+
+#Backtest on the same 12 weeks in 2017, bu tusing the full set
+ym_end = "2017-05-01"
+backtest_results_full_set = {}
+period = 14
+
+for i in range(6): 
+    total_res, result, tickers, total_rets, partial_rets = backtesting(DF, "next", best_set = full_set, period = period, test_size = 0.02, ym_start = "1999-01-01", ym_end= ym_end, kernel_size = 2, dropout = 0.2, epochs = 2, batch = 512, verbose = 1)
+    backtest_results_full_set[ym_end] = total_res, result, tickers, total_rets, partial_rets 
+    print("Done with number: " + str(i))
+    ym_end = str(np.datetime64(ym_end) + np.array(period, 'timedelta64[D]'))
+
+
+
+#extract the results of the strategy
+full_set_results = []
+for key in backtest_results_full_set.keys():
+    full_set_result = backtest_results_full_set[key][0][-1:]
+    full_set_results.append(full_set_result)
+
+#get the results of the strategy, best    
+best_set_total = np.array(best_set_results)
+best_set_total = best_set_total.reshape(best_set_total.shape[0])
+final_best = np.cumprod(best_set_total)[-1:]   
+    
+
+#get the result of the strategy, full
+full_set_total = np.array(full_set_results)
+full_set_total = full_set_total.reshape(full_set_total.shape[0])
+final_full = np.cumprod(full_set_total)[-1:]
+
+#create a dateaframe to compare the results 
+res_df = pd.DataFrame([full_set_total, best_set_total], ["Full", "Best"], backtest_results_full_set.keys())
+
+#print the resutls to csv
+res_df.to_csv("results_strategy.csv")
+
